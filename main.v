@@ -31,16 +31,14 @@ fn (mut ws WordleState) check_guess(guess string) []LetterColor {
 	ws.guesses << guess
 
 	mut letter_colors := []LetterColor{len: ws.config.word_length}
-	for i in 0 .. ws.config.word_length {
-		guess_rune := guess.runes()[i]
+	for i, guess_rune in guess.runes() {
 		answer_rune := ws.answer.runes()[i]
 		if guess_rune == answer_rune {
 			letter_colors[i] = .green
 		}
 	}
-	for i in 0 .. ws.config.word_length {
+	for i, guess_rune in guess.runes() {
 		if letter_colors[i] == .gray {
-			guess_rune := guess.runes()[i]
 			for j in 0 .. ws.config.word_length {
 				if i == j || letter_colors[j] == .green {
 					continue
