@@ -1,13 +1,19 @@
+import os
+import rand
+
 [params]
 struct WordleConfig {
-	word_length int = 5
-	max_guesses int = 6
-	// TODO dictionary?
+	word_length     int    = 5
+	max_guesses     int    = 6
+	answers_file    string = './word-lists/wordle-nyt-answers-alphabetical.txt'
+	dictionary_file string = './word-lists/wordle-nyt-dictionary.txt'
+	answer          string
 }
 
 struct WordleState {
-	config WordleConfig
-	answer string
+	config     WordleConfig
+	dictionary []string
+	answer     string
 mut:
 	guesses []string
 }
@@ -19,8 +25,17 @@ enum LetterColor {
 }
 
 fn new_wordle(wc WordleConfig) WordleState {
+	mut answer := wc.answer
+	if wc.answer == '' {
+		answers := os.read_lines(wc.answers_file) or { [] }
+		random_answer_index := rand.int_in_range(0, answers.len) or { 0 }
+		answer = answers[random_answer_index]
+	}
+	dictionary := os.read_lines(wc.dictionary_file) or { [] }
 	ws := WordleState{
-		answer: 'happy' // TODO make this be random
+		config: wc
+		dictionary: dictionary
+		answer: answer
 	}
 	return ws
 }
@@ -28,6 +43,7 @@ fn new_wordle(wc WordleConfig) WordleState {
 fn (mut ws WordleState) check_guess(guess string) []LetterColor {
 	assert ws.guesses.len < ws.config.max_guesses
 	assert guess.runes().len == ws.config.word_length
+	assert guess in ws.dictionary
 	ws.guesses << guess
 
 	mut letter_colors := []LetterColor{len: ws.config.word_length}
