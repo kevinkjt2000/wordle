@@ -24,6 +24,23 @@ enum LetterColor {
 	yellow
 }
 
+pub fn (color LetterColor) str() string {
+	red, green, blue := match color {
+		.gray { 0x2c, 0x30, 0x32 }
+		.green { 0x42, 0x71, 0x3e }
+		.yellow { 0x91, 0x7f, 0x2f }
+	}
+	return '\033[48:2::$red:$green:${blue}m \033[49m'
+}
+
+pub fn (colors []LetterColor) str() string {
+	mut ret := ''
+	for c in colors {
+		ret += c.str()
+	}
+	return ret
+}
+
 fn new_wordle(wc WordleConfig) WordleState {
 	mut answer := wc.answer
 	if wc.answer == '' {
@@ -73,10 +90,10 @@ fn (mut ws WordleState) check_guess(guess string) []LetterColor {
 fn main() {
 	println("Hi, I'm gonna be a wordle solver!")
 	mut ws := new_wordle()
-	ws.check_guess('purse')
-	ws.check_guess('steak')
-	ws.check_guess('class')
-	ws.check_guess('floss')
-	ws.check_guess('fetch')
-	ws.check_guess('churn')
+	println(ws.check_guess('purse'))
+	println(ws.check_guess('steak'))
+	println(ws.check_guess('class'))
+	println(ws.check_guess('floss'))
+	println(ws.check_guess('fetch'))
+	println(ws.check_guess('churn'))
 }
