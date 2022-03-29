@@ -21,25 +21,17 @@ mut:
 }
 
 enum LetterColor {
-	gray
-	green
-	yellow
-}
-
-pub fn (color LetterColor) int() int {
-	match color {
-		.gray { return 0x2c3032 }
-		.green { return 0x42713e }
-		.yellow { return 0x917f2f }
-	}
+	gray = 0x2c3032
+	green = 0x42713e
+	yellow = 0x917f2f
 }
 
 fn print_guess(colors []LetterColor, guess string, show_letters bool) {
 	for i, color in colors {
 		if show_letters {
-			print(term.bg_hex(color.int(), guess[i].ascii_str()))
+			print(term.bg_hex(int(color), guess[i].ascii_str()))
 		} else {
-			print(term.bg_hex(color.int(), ' '))
+			print(term.bg_hex(int(color), ' '))
 		}
 	}
 }
@@ -66,7 +58,7 @@ fn (mut ws WordleState) check_guess(guess string) []LetterColor {
 	assert guess in ws.dictionary
 	ws.guesses << guess
 
-	mut letter_colors := []LetterColor{len: ws.config.word_length}
+	mut letter_colors := []LetterColor{len: ws.config.word_length, init: LetterColor.gray}
 	for i, guess_rune in guess.runes() {
 		answer_rune := ws.answer.runes()[i]
 		if guess_rune == answer_rune {
