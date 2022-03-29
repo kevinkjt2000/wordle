@@ -1,5 +1,6 @@
 import os
 import rand
+import term
 
 [params]
 struct WordleConfig {
@@ -7,6 +8,7 @@ struct WordleConfig {
 	max_guesses     int    = 6
 	answers_file    string = './word-lists/wordle-nyt-answers-alphabetical.txt'
 	dictionary_file string = './word-lists/wordle-nyt-dictionary.txt'
+	show_letters    bool
 	answer          string
 }
 
@@ -24,21 +26,22 @@ enum LetterColor {
 	yellow
 }
 
-pub fn (color LetterColor) str() string {
-	red, green, blue := match color {
-		.gray { 0x2c, 0x30, 0x32 }
-		.green { 0x42, 0x71, 0x3e }
-		.yellow { 0x91, 0x7f, 0x2f }
+pub fn (color LetterColor) int() int {
+	match color {
+		.gray { return 0x2c3032 }
+		.green { return 0x42713e }
+		.yellow { return 0x917f2f }
 	}
-	return '\033[48:2::$red:$green:${blue}m \033[49m'
 }
 
-pub fn (colors []LetterColor) str() string {
-	mut ret := ''
-	for c in colors {
-		ret += c.str()
+fn print_guess(colors []LetterColor, guess string, show_letters bool) {
+	for i, color in colors {
+		if show_letters {
+			print(term.bg_hex(color.int(), guess[i].ascii_str()))
+		} else {
+			print(term.bg_hex(color.int(), ' '))
+		}
 	}
-	return ret
 }
 
 fn new_wordle(wc WordleConfig) WordleState {
@@ -84,16 +87,19 @@ fn (mut ws WordleState) check_guess(guess string) []LetterColor {
 			}
 		}
 	}
+	print_guess(letter_colors, guess, ws.config.show_letters)
+	println('')
 	return letter_colors
 }
 
 fn main() {
+	show_letters := '--show-letters' in os.args[1..]
 	println("Hi, I'm gonna be a wordle solver!")
-	mut ws := new_wordle()
-	println(ws.check_guess('purse'))
-	println(ws.check_guess('steak'))
-	println(ws.check_guess('class'))
-	println(ws.check_guess('floss'))
-	println(ws.check_guess('fetch'))
-	println(ws.check_guess('churn'))
+	mut ws := new_wordle(show_letters: show_letters)
+	ws.check_guess('purse')
+	ws.check_guess('steak')
+	ws.check_guess('class')
+	ws.check_guess('floss')
+	ws.check_guess('fetch')
+	ws.check_guess('churn')
 }
