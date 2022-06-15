@@ -8749,6 +8749,7 @@ stats
 staun
 staws
 stays
+steal
 stean
 stear
 stedd
