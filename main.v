@@ -88,23 +88,24 @@ fn (mut ws WordleState) submit_guess(guess string) {
 	letter_colors := ws.color_guess(guess)
 	print_guess(letter_colors, guess, ws.config.show_letters)
 	println('')
-	ws.eliminate_invalid_answers()
+	ws.eliminate_invalid_answers(guess, letter_colors)
 	ws.print_leftover_words()
 }
 
-fn (mut ws WordleState) eliminate_invalid_answers() {
+fn (mut ws WordleState) eliminate_invalid_answers(guess string, letter_colors []LetterColor) {
+	mut letter_color_counts := map[LetterColor]map[rune]int{}
+	for i, color in letter_colors {
+		letter_color_counts[color][guess[i]] += 1
+	}
 	mut answers := ws.remaining_answers
-	for guess in ws.guesses {
-		letter_colors := ws.color_guess(guess)
-		for i, color in letter_colors {
-			if color == .green {
-				answers = answers.filter(guess[i] == it[i])
-			} else if color == .yellow {
-				answers = answers.filter(guess[i] in it.bytes())
-			} else if color == .gray {
-				// TODO: obviously this is a buggy implementation that would fail if there were duplicates of a letter
-				answers = answers.filter(guess[i] !in it.bytes())
-			}
+	for i, color in letter_colors {
+		if color == .green {
+			answers = answers.filter(guess[i] == it[i])
+		} else if color == .yellow {
+			answers = answers.filter(guess[i] in it.bytes() && guess[i] != it[i])
+		} else if color == .gray {
+			answers = answers.filter(guess[i] !in it.bytes()
+				&& letter_color_counts[.yellow][guess[i]] + letter_color_counts[.green][guess[i]] == 0)
 		}
 	}
 	ws.remaining_answers = answers

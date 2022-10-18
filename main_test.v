@@ -14,3 +14,19 @@ fn test_submit_guess_produces_correct_colors() {
 	assert ws.color_guess('fleet') == [.gray, .gray, .green, .green, .green]
 	assert ws.color_guess('sweet') == [.green, .green, .green, .green, .green]
 }
+
+fn test_yellow_letters_remove_possible_guesses() {
+	mut ws := new_wordle(show_letters: true, answer: 'scald')
+	ws.submit_guess('steal')
+	assert 'salad' !in ws.remaining_answers
+}
+
+fn test_final_answer_remains_at_end() {
+	mut ws := new_wordle(answer: 'exist')
+	ws.submit_guess('steal')
+	ws.submit_guess('round')
+	ws.submit_guess('testy')
+	ws.submit_guess('might')
+	ws.submit_guess('exist')
+	assert ws.remaining_answers.len == 1
+}
